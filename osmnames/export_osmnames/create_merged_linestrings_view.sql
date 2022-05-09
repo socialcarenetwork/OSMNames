@@ -18,13 +18,14 @@ SELECT
   get_country_name(parentInfo.country_code) AS country,
   parentInfo.country_code AS country_code,
   parentInfo.displayName AS display_name,
+  parentInfo.parentIds AS parent_ids,
   round(ST_XMIN(ST_Transform(geometry, 4326))::numeric, 5) AS west,
   round(ST_YMIN(ST_Transform(geometry, 4326))::numeric, 5) AS south,
   round(ST_XMAX(ST_Transform(geometry, 4326))::numeric, 5) AS east,
   round(ST_YMAX(ST_Transform(geometry, 4326))::numeric, 5) AS north,
   NULLIF(wikidata, '') AS wikidata,
   NULLIF(wikipedia, '') AS wikipedia,
-  get_housenumbers(osm_id) AS housenumbers
+  NULL::VARCHAR AS housenumbers
 FROM
   osm_merged_linestring,
   determine_class(type) AS class,

@@ -9,5 +9,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 .cache/
+.idea
 
 docs/_build_html/

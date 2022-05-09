@@ -32,6 +32,7 @@ DECLARE
 BEGIN
   current_id := id;
   retval.displayName := name;
+  retval.parentIds := '';
 
   WHILE current_id IS NOT NULL LOOP
     SELECT p.name, p.place_rank, p.parent_id, p.type, p.country_code
@@ -43,6 +44,12 @@ BEGIN
       retval.displayName := current_name;
     ELSE
       retval.displayName := retval.displayName || ', ' || current_name;
+    END IF;
+
+    IF retval.parentIds = '' THEN
+      retval.parentIds = current_id;
+    ELSE
+      retval.parentIds := retval.parentIds || ', ' || current_id;
     END IF;
 
     IF current_country_code IS NOT NULL THEN
@@ -70,10 +77,10 @@ $$ LANGUAGE plpgsql IMMUTABLE;
 
 DROP FUNCTION IF EXISTS get_country_name(VARCHAR);
 CREATE FUNCTION get_country_name(country_code_in VARCHAR(2)) returns TEXT as $$
-  SELECT COALESCE(name -> 'name:en',
+  SELECT COALESCE(name -> 'name:de',
                   name -> 'name',
+                  name -> 'name:en',
                   name -> 'name:fr',
-                  name -> 'name:de',
                   name -> 'name:es',
                   name -> 'name:ru',
                   name -> 'name:zh')

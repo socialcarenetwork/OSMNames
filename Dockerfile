@@ -1,7 +1,14 @@
 FROM golang:1.11
 
-RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' >> /etc/apt/sources.list && \
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates
+
+RUN update-ca-certificates
+
+RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' >> /etc/apt/sources.list
+RUN wget --no-check-certificate -O /tmp/postgresqlkey.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+RUN apt-key add /tmp/postgresqlkey.asc
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -32,6 +39,7 @@ RUN apt-get purge -y --auto-remove \
 ADD . /osmnames
 WORKDIR /osmnames
 
+# RUN pip3 install psycopg2-binary==2.7.7
 RUN pip3 install -r requirements.txt.lock
 
 CMD ["./run.py"]

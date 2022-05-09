@@ -29,7 +29,7 @@ def import_wikipedia():
 
 def download_dump(url):
     destination_dir = settings.get("IMPORT_DIR")
-    logged_check_call(["wget", "--no-clobber", "--directory-prefix", destination_dir, url])
+    logged_check_call(["wget", "--no-clobber", "--no-check-certificate", "--directory-prefix", destination_dir, url])
 
 
 def restore_wikipedia_dumps():

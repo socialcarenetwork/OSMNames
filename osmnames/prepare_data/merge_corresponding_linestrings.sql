@@ -3,6 +3,19 @@ CREATE INDEX IF NOT EXISTS osm_linestring_geom ON osm_linestring USING gist(geom
 CREATE INDEX IF NOT EXISTS idx_osm_linestring_name ON osm_linestring(name); --&
 CLUSTER osm_linestring_geom ON osm_linestring;
 
+-- germany everything
+UPDATE osm_polygon
+SET name = all_tags -> 'name:de'
+WHERE all_tags -> 'name:de' is not null;
+
+UPDATE osm_point
+SET name = all_tags -> 'name:de'
+WHERE all_tags -> 'name:de' is not null;
+
+UPDATE osm_linestring
+SET name = all_tags -> 'name:de'
+WHERE all_tags -> 'name:de' is not null;
+
 -- create merged linestrings
 DROP TABLE IF EXISTS osm_merged_linestring CASCADE;
 CREATE TABLE osm_merged_linestring AS
@@ -39,8 +52,22 @@ DROP INDEX osm_linestring_geom; --&
 DROP INDEX IF EXISTS idx_osm_linestring_merged_false; --&
 
 -- set merged_into for all merged linestrings
-UPDATE osm_linestring SET merged_into = osm_merged_linestring.osm_id
-FROM osm_merged_linestring
-WHERE osm_linestring.id = ANY(osm_merged_linestring.member_ids);
+create unlogged table harrie_member_osmid
+(
+    member_id bigint,
+    osm_id bigint,
+    primary key(member_id, osm_id)
+);
+
+insert into harrie_member_osmid (member_id, osm_id)
+select unnest(osm_merged_linestring.member_ids), osm_id
+from osm_merged_linestring;
+
+UPDATE osm_linestring
+SET merged_into = harrie_member_osmid.osm_id
+    FROM harrie_member_osmid
+WHERE osm_linestring.id = harrie_member_osmid.member_id;
+
+drop table harrie_member_osmid;
 
 CREATE INDEX idx_osm_linestring_merged_false ON osm_linestring(merged_into) WHERE merged_into IS NULL;

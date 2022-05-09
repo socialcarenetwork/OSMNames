@@ -21,18 +21,18 @@ END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
 -- use imported country code for polygons if present
-UPDATE osm_polygon SET country_code = lower(imported_country_code) WHERE imported_country_code IS NOT NULL;
+-- UPDATE osm_polygon SET country_code = lower(imported_country_code) WHERE imported_country_code IS NOT NULL;
 
 -- use country grid to set country codes for containing polygons
-DO $$
-BEGIN
-  PERFORM set_country_code_for_polygons_within_geometry(lower(country_code), geometry)
-          FROM country_osm_grid
-          ORDER BY area ASC;
-END
-$$ LANGUAGE plpgsql;
+-- DO $$
+-- BEGIN
+--   PERFORM set_country_code_for_polygons_within_geometry(lower(country_code), geometry)
+--           FROM country_osm_grid
+--           ORDER BY area ASC;
+-- END
+-- $$ LANGUAGE plpgsql;
 
 -- finally use most intersecting country to set country_code
 UPDATE osm_polygon
-  SET country_code = get_most_intersecting_country_code(geometry)
+  SET country_code = 'de'
 WHERE country_code = '' IS NOT FALSE
